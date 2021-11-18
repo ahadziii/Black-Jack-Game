@@ -68,7 +68,6 @@ public class DeckTest extends TestCase {
     }
 
 
-
     public void testGenerateCardList() {
         assertEquals(Deck.generateCardList(), expectedDeck);
     }
