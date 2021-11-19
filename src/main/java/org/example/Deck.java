@@ -9,6 +9,11 @@ public class Deck {
 
     private List<Card> cardList = new ArrayList<>();
 
+    public List<Card> getCardList() {
+        return cardList;
+    }
+
+
     private Deck(List<Card> cardList) {
         this.cardList = cardList;
     }
@@ -28,9 +33,16 @@ public class Deck {
         Collections.shuffle(cardList);
     }
 
+    //check deck size
+    public int checkDeckSize(){
+        return getCardList().size();
+    }
+
 
     public Card deal() {
-        return cardList.remove(0);
+        Card card = cardList.get(cardList.size()-1);
+        cardList.remove(cardList.size()-1);
+        return card;
     }
 
     @Override
