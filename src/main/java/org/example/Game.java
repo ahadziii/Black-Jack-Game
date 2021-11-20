@@ -1,28 +1,50 @@
 package org.example;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Game {
-    // define defaults in constructor
-    //
+
     private List<Player> playerList;
     private int numberOfPlayers;
     private Deck deck;
+    private boolean isGameEnded ;
 
     public Game(int numberOfPlayers) {
         this.numberOfPlayers = numberOfPlayers;
         playerList = new ArrayList<>();
         deck= Deck.generateCardList();
         createPlayers();
+        isGameEnded = false;
     }
 
-    public int getNumberOfPlayers() {
-        return numberOfPlayers;
+    public boolean isGameEnded() {
+        return isGameEnded;
     }
 
+    public void setGameEnded(boolean gameEnded) {
+        isGameEnded = gameEnded;
+    }
+
+    //create players
+    public void createPlayers() {
+
+        for (int x = 0; x < numberOfPlayers; x++) {
+            playerList.add(new Player("player"+ x, ""));
+        }
+        System.out.println("Creating your players. Kindly Hold on");
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(numberOfPlayers + " players created");
+        System.out.println();
+        System.out.println(playerList);
+
+    }
 
     public List<Player> getPlayerList() {
         return playerList;
@@ -32,176 +54,202 @@ public class Game {
         this.playerList = playerList;
     }
 
-    //create players
-    public List<Player> createPlayers(){
-
-        for (int x = 0; x < numberOfPlayers; x++) {
-            playerList.add(new Player("player"+ x, ""));
-        }
-        System.out.println(numberOfPlayers + " number of players created");
-        System.out.println(playerList);
-        return playerList;
-    }
-
-
     //initial method to deal Cards
-    public void dealCards(){
+    public void dealCards() {
+        System.out.println("Dealing Cards to your players");
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         for (Player player : playerList) {
             player.hit(deck.deal());
             player.hit(deck.deal());
             player.getAction();
         }
+        //printing the players after dealing the card
+    }
 
-        System.out.println(playerList);
-        System.out.println(deck.checkDeckSize() + " cards left");
+    public void startGame(){
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+       shuffleCards();
+        System.out.println();
+
+
+        dealCards();
+        System.out.println();
 
     }
 
-    //TODO
-
-    //calculate each player points and find the strategy
-   /* public void checkPlayersStrategy(){
 
 
-        for (Player player : playerList) {
-            String playerAction = player.getAction();
+    //checks is busted player is busted or not
+    //if not we check if he is a hit
+    //if yes we hand him a new card
+    //if not he is a stick and we do nothing
 
-            if (Objects.equals(playerAction, "hit")){
-                Card card = deck.deal();
+    public void isHitOrStick(Player player){
 
-
-                player.hit(card);
-                checkPlayersStrategy();
-
-            } else if(Objects.equals(playerAction, "stick")){
-                player.setStatus(Status.STICK);
-            } else if(Objects.equals(playerAction, "black jack")){
-                player.setStatus(Status.BLACKJACK);
-            }
-            else if(Objects.equals(playerAction, "bust")){
-                player.setStatus(Status.BUST);
+        if(isGameEnded()== false) {
+            player.getAction();
+            if (!isBusted(player.getScore())) {
+                player.getAction();
+                if (player.getAction() == Status.HIT) {
+                    Card card = deck.deal();
+                    player.hit(card);
+                    System.out.println(player.getPlayerName() + " has been hit with another card");
+                }
             }
 
 
         }
 
-    }*/
-
-    //check for winner
-    //public void
-    public boolean isGameOn(){
-        for (Player player : playerList) {
-            if (playerList.stream().allMatch(p1 -> p1.getStatus() == Status.STICK)) {
-                // loop through each player and get their score
-                // return player with highest score
-                System.out.println("All players have a stick");
-                if (getHighestScore() == player.sumPlayerCards()){
-                    System.out.println("Player: " + player.getPlayerName() + " has WON!!");
-                }
-
-                return false;
-
-
-            } else if (playerList.stream().anyMatch(p -> p.getStatus() == Status.BLACKJACK)) {
-                System.out.println("Player: " + player.getPlayerName() + " has WON!!");
-                return false;// return that particular player
-
-            } else if (playerList.stream().anyMatch(p -> p.getStatus() == Status.HIT)) {
-
-
-                // check if all others have a Bust Status
-                if(playerList.stream().filter(p1-> p1.getStatus()== Status.BUST).count() == playerList.size()-1){
-                    return false;
-                }else {
-
-
-                    return true;
-                }
-
-
-            }else {
-                return true;
-            }
-
-        }
-        // TODO
-        return true;
-
     }
+
 
     public boolean isBusted(int score) {
         return score > 21;
+    }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "playerList=" + playerList +
+                '}';
     }
 
     public boolean isBlackJack(int score) {
         return score == 21;
     }
 
-    public void startGame(){
+    //does another is there is no black jack in the initial
+    public void anotherRound(){
+        System.out.println("No player has a BlackJack");
+        System.out.println("The Game continues!!!!!!");
+
+
+
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //check if more than 1 person has a stick
+        if (playerList.stream().filter(p1 -> p1.getStatus() == Status.STICK).count() > 1 && playerList.stream().filter(p1 -> p1.getStatus() == Status.HIT).count() == 0){
+
+            System.out.println("More than one player has a Stick and the others are bust");
+            System.out.println("Calculating the winner");
+            List<Player> playersWithStick = playerList.stream().filter(p1 -> (p1.getStatus() == Status.STICK)).collect(Collectors.toList());
+
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println();
+            getHighestScorer(playersWithStick);
+            setGameEnded(true);
+            endGame();
+        }
+
+        //check to see if all the players have have a bust
+        if(playerList.stream().filter(p1-> p1.getStatus() == Status.BUST).count() == playerList.size()){
+            System.out.println("All players are busted out of the game");
+            System.out.println("There is no the winner");
+            setGameEnded(true);
+            endGame();
+        }
+
+
+        // check if all others have a Bust Status
+        if(playerList.stream().filter(p1-> p1.getStatus() == Status.BUST).count() == numberOfPlayers - 1){
+            Stream<Player> notBustPlayer = playerList.stream().filter(p1 -> p1.getStatus() != Status.BUST);
+            System.out.println(notBustPlayer.map(player -> player.getPlayerName().toLowerCase()) + " has won the game");
+            this.setGameEnded(true);
+            endGame();
+        }
+
+        // check if the game is On(whether someone has a stick or a hit) or someone has a blackjack
+        for (Player player : playerList) {
+            isHitOrStick(player);
+            player.setScore(player.getScore());
+            player.getAction();
+
+        }
+        checkForBlackJack();
+
+
+
+    }
+
+
+
+
+    //get each players highest scorer
+    public void getHighestScorer(List<Player> players){
+        int highestScore = players.stream().mapToInt(Player::getScore).max().getAsInt();
+        for (Player player : players) {
+            if(player.getScore() == highestScore){
+                System.out.println(player.getPlayerName() + " is the winner");
+            }
+        }
+    }
+
+
+    //shuffleCards
+    public void shuffleCards(){
+        System.out.println("Shuffling cards now");
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         deck.shuffleCards();
-        dealCards();
+    }
+
+    //end the game
+    public void endGame(){
+        setGameEnded(true);
+        System.out.println("The game has ended");
+    }
+
+
+    public void checkForBlackJack(){
+
+
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
 
         for (Player player : playerList) {
-            if (isBusted(player.sumPlayerCards())) {
+            if (isBusted(player.getScore())) {
                 player.setStatus(Status.BUST);
-            } else if (isBlackJack(player.sumPlayerCards())) {
+            } else if (isBlackJack(player.getScore())) {
                 player.setStatus(Status.BLACKJACK);
-                // end game because player has black jack
+                System.out.println(playerList);
+                System.out.println("Player: " + player.getPlayerName() + " has hit a BLACK JACK!!");
+                System.out.println("Player: " + player.getPlayerName() + " has WON!!");
+                setGameEnded(true);
+                endGame();
             } else {
                 player.setStatus(Status.HIT);
             }
-        }
-
-        boolean isGameOn = true;
-
-        if(isGameOn() == false){
-
-        }else{
-            while(isGameOn){
-
-                //check to see if any player has a hit
-                //and give them a card
-
-                for (Player player : playerList) {
-                    //List<Player> playersWithHit = playerList.stream().filter(p1 -> p1.getStatus() == Status.HIT).collect(Collectors.toList());
-                    if(player.getStatus() == Status.HIT){
-                        Card card = deck.deal();
-                        player.hit(card);
-                    }
-
-                }
-
-
-
-
-
-
-
-                isGameOn();
-
-                //go for each player
-                //get their actions
-            }
 
         }
 
-
-
-        // go for each player, check their strategy
-
     }
-
-    //get highest score
-
-    public int getHighestScore(){
-        return playerList.stream().mapToInt(Player::sumPlayerCards).max().getAsInt();
-    }
-
-
-
-
-
 
 
 

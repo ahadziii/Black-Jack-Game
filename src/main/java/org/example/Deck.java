@@ -33,12 +33,12 @@ public class Deck {
         Collections.shuffle(cardList);
     }
 
-    //check deck size
+
     public int checkDeckSize(){
         return getCardList().size();
     }
 
-
+    //remove one cad from the list of cards
     public Card deal() {
         Card card = cardList.get(cardList.size()-1);
         cardList.remove(cardList.size()-1);

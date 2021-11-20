@@ -10,12 +10,18 @@ public class Player {
     private int score;
     private Status status;
 
-    public Status getStatus() {
-        return status;
+
+
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    //method to sum player cards
+    public int getScore(){
+        int s = playerCards.stream().mapToInt(Card::getValue).sum();
+        setScore(s);
+        return s;
     }
 
     public Player(String playerName, String strategy) {
@@ -25,6 +31,13 @@ public class Player {
         this.status = Status.DEFAULT;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
 
     public String getStrategy() {
@@ -46,10 +59,7 @@ public class Player {
 
 
 
-    //method to sum player cards
-    public int sumPlayerCards(){
-        return this.playerCards.stream().mapToInt(x -> x.getValue()).sum();
-    }
+
 
     @Override
     public String toString() {
@@ -57,33 +67,37 @@ public class Player {
                 "playerName='" + playerName + '\'' +
                 ", playerCards=" + playerCards +
                 ", strategy='" + strategy + '\'' +
-                ", score='" + sumPlayerCards() + '\'' +
+                ", score='" + score + '\'' +
                 ", status='" + getStatus() + '\'' +
                 '}';
     }
 
     //method to check the strategy
-    public void getAction() {
-        if (sumPlayerCards() < 17 ) {
+    public Status getAction() {
+        Status status = getStatus();
+        if (getScore() < 17 ) {
             setStatus(Status.HIT);
+            return status;
 
-        } else if (sumPlayerCards() >= 17 && sumPlayerCards() < 21) {
+        } else if (getScore() >= 17 && getScore() < 21) {
             setStatus(Status.STICK);
+            return status;
 
-        } else if(sumPlayerCards() == 21){
+        } else if(getScore() == 21){
             setStatus(Status.BLACKJACK);
+            return status;
 
-        } else if(sumPlayerCards() > 21)  {
+        } else if(getScore() > 21)  {
             setStatus(Status.BUST);
-
+            return status;
         }
+        return status;
     }
 
 
-
-    //hhit method to distribute a card to a player
+    //hit method to hand a card to a player
     public void hit(Card card){
-        this.playerCards.add(card);
+        playerCards.add(card);
     }
 
 
